@@ -9,5 +9,5 @@ def get_credentials():
         credentials = safe_load(f.read())
     return credentials
 
-def _get_api():
-    return twitter.Api(**get_credentials())
+def get_api():
+    return twitter.Api(application_only_auth=True, **get_credentials())
