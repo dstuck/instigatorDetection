@@ -1,0 +1,5 @@
+Generic single-database configuration.
+
+Create a new revision with: `alembic revision -m "description of change"`
+
+Update migrations: `alembic upgrade head`

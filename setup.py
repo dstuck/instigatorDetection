@@ -8,6 +8,8 @@ setup(
     packages=find_packages(),
     install_requires=[
         "python-twitter",
-        "pyyaml"
+        "pyyaml",
+        "alembic-1.0.0",
+        "psycopg2-2.7.5",
     ],
 )
