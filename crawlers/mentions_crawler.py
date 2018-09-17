@@ -3,11 +3,11 @@ from utils.api_utils import get_api
 
 class MentionsCrawler(object):
     """
-    Class to crawl back through a single user's mentions (non-retweet @ mentions)
+    Class to crawl back through a single user's crawlers (non-retweet @ crawlers)
     """
     def __init__(self, user, api=None, last_id=None):
         """
-        :param user: twitter handle to check mentions for
+        :param user: twitter handle to check crawlers for
         :param api: twitter.Api object
         :param last_id: int, status id of oldest status already pulled
         """
@@ -55,7 +55,7 @@ if __name__ == "__main__":
 
     PARSER = argparse.ArgumentParser()
     PARSER.add_argument('user')
-    PARSER.add_argument('-n', '--n-mentions', required=False)
+    PARSER.add_argument('-n', '--n-crawlers', required=False)
     PARSED_ARGS = PARSER.parse_args()
 
     mention_crawler = MentionsCrawler(PARSED_ARGS.user)
