@@ -2,10 +2,20 @@ from utils.api_utils import get_api
 
 
 class MentionsCrawler(object):
-    def __init__(self, user):
+    """
+    Class to crawl back through a single user's mentions (non-retweet @ mentions)
+    """
+    def __init__(self, user, api=None, last_id=None):
+        """
+        :param user: twitter handle to check mentions for
+        :param api: twitter.Api object
+        :param last_id: int, status id of oldest status already pulled
+        """
         self.user = user
         self.request_count = 100
-        self._api = None
+        self._api = api
+        self.mentions = []
+        self.last_id = last_id
 
     @property
     def api(self):
@@ -21,12 +31,24 @@ class MentionsCrawler(object):
         :return: List of twitter.Status
         """
         return self.api.GetSearch(
-            term='@{}'.format(self.user),
+            term='@{} -filter:retweets'.format(self.user),
             result_type='recent',
             count=self.request_count,
             since_id=since_id,
             max_id=max_id
         )
+
+    def crawl(self):
+        max_id = self.last_id
+        if max_id:
+            max_id = max_id - 1
+        new_mentions = self.crawl_mentions_in_range(max_id=max_id)
+        if new_mentions:
+            self.last_id = new_mentions[-1].id
+            self.mentions.extend(new_mentions)
+            return True
+        return False
+
 
 if __name__ == "__main__":
     import argparse
