@@ -23,8 +23,7 @@ def upgrade():
         sa.Column('user_id', sa.BigInteger),
         sa.Column('user_screen_name', sa.String(50)),
         sa.Column('text', sa.Unicode(300)),
-        sa.Column('created_at', sa.DateTime()),
-        sa.Column('storer_id', sa.Text()),
+        sa.Column('created_at', sa.Integer()),
     )
 
 
