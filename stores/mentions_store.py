@@ -3,6 +3,7 @@ from sqlalchemy import create_engine, MetaData, Table
 from config import CONFIG
 
 
+# TODO: Remove deprecated
 class MentionsStore(object):
     _engine = None
     _mentions_table = None

@@ -1,9 +1,10 @@
 from calendar import timegm
+from datetime import datetime
 from email.utils import parsedate
 
-from sqlalchemy import Column, BigInteger, Integer, String
+from sqlalchemy import BigInteger, Column, DateTime, Integer, ForeignKey, String
+from sqlalchemy.orm import relationship
 from database import Base
-
 
 
 class User(Base):
@@ -17,6 +18,19 @@ class User(Base):
     lang = Column(String(20))
     description = Column(String(320))
     name = Column(String(200))
+    db_created_at = Column(
+        DateTime,
+        nullable=False,
+        default=datetime.utcnow,
+    )
+    db_updated_at = Column(
+        DateTime,
+        nullable=False,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow,
+    )
+
+    tweets = relationship("Tweet", order_by="desc(Tweet.id)", back_populates="user")
 
     def __repr__(self):
         return '<User {}, {}>'.format(self.screen_name, self.id)
@@ -35,3 +49,46 @@ class User(Base):
             'name': twitter_user.name,
         }
         return cls(**init_kwargs)
+
+
+class Tweet(Base):
+    __tablename__ = 'tweets'
+    id = Column(BigInteger, primary_key=True)
+    user_id = Column(BigInteger, ForeignKey('users.id'))
+    created_at = Column(Integer())
+    text = Column(String(320))
+    lang = Column(String(20))
+    in_reply_to_tweet_id = Column(BigInteger)
+    in_reply_to_user_id = Column(BigInteger)
+    db_created_at = Column(
+        DateTime,
+        nullable=False,
+        default=datetime.utcnow,
+    )
+    db_updated_at = Column(
+        DateTime,
+        nullable=False,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow,
+    )
+
+    user = relationship("User", back_populates="tweets")
+
+    def __repr__(self):
+        return '<Tweet @{}: {}>'.format(self.user.screen_name, self.text)
+
+    @classmethod
+    def from_twitter_status(cls, tweet_status):
+        init_kwargs = {
+            'id': tweet_status.id,
+            'user_id': tweet_status.user.id,
+            'created_at': tweet_status.created_at_in_seconds,
+            'text': tweet_status.text,
+            'lang': tweet_status.lang,
+            'in_reply_to_tweet_id': tweet_status.in_reply_to_status_id,
+            'in_reply_to_user_id': tweet_status.in_reply_to_user_id,
+            # 'user_mentions': [User.from_twitter_user(u) for u in tweet_status.user_mentions]
+        }
+        tweet = cls(**init_kwargs)
+        tweet.user = User.from_twitter_user(tweet_status.user)
+        return tweet
