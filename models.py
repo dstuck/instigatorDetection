@@ -2,9 +2,18 @@ from calendar import timegm
 from datetime import datetime
 from email.utils import parsedate
 
-from sqlalchemy import BigInteger, Column, DateTime, Integer, ForeignKey, String
+from sqlalchemy import BigInteger, Column, DateTime, Integer, ForeignKey, String, Table
 from sqlalchemy.orm import relationship
 from database import Base
+
+
+# association table
+tweet_mentions = Table(
+    'tweet_mentions',
+    Base.metadata,
+    Column('tweet_id', ForeignKey('tweets.id'), primary_key=True),
+    Column('user_id', ForeignKey('users.id'), primary_key=True)
+)
 
 
 class User(Base):
@@ -31,6 +40,11 @@ class User(Base):
     )
 
     tweets = relationship("Tweet", order_by="desc(Tweet.id)", back_populates="user")
+    mentions = relationship(
+        "Tweet",
+        secondary=tweet_mentions,
+        back_populates="mentioned_users"
+    )
 
     def __repr__(self):
         return '<User {}, {}>'.format(self.screen_name, self.id)
@@ -40,7 +54,7 @@ class User(Base):
         init_kwargs = {
             'id': twitter_user.id,
             'screen_name': twitter_user.screen_name,
-            'created_at': timegm(parsedate(twitter_user.created_at)),
+            'created_at': timegm(parsedate(twitter_user.created_at)) if twitter_user.created_at else None,
             'followers_count': twitter_user.followers_count,
             'favorites_count': twitter_user.favourites_count,
             'statuses_count': twitter_user.statuses_count,
@@ -73,6 +87,11 @@ class Tweet(Base):
     )
 
     user = relationship("User", back_populates="tweets")
+    mentioned_users = relationship(
+        "User",
+        secondary=tweet_mentions,
+        back_populates="mentions"
+    )
 
     def __repr__(self):
         return '<Tweet @{}: {}>'.format(self.user.screen_name, self.text)
@@ -87,8 +106,9 @@ class Tweet(Base):
             'lang': tweet_status.lang,
             'in_reply_to_tweet_id': tweet_status.in_reply_to_status_id,
             'in_reply_to_user_id': tweet_status.in_reply_to_user_id,
-            # 'user_mentions': [User.from_twitter_user(u) for u in tweet_status.user_mentions]
         }
         tweet = cls(**init_kwargs)
         tweet.user = User.from_twitter_user(tweet_status.user)
+        for m_user in tweet_status.user_mentions:
+            tweet.mentioned_users.append(User.from_twitter_user(m_user))
         return tweet
