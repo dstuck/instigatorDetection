@@ -7,7 +7,7 @@ from sqlalchemy.orm import relationship
 from database import Base
 
 
-# association table
+# association tables
 tweet_mentions = Table(
     'tweet_mentions',
     Base.metadata,
@@ -15,6 +15,12 @@ tweet_mentions = Table(
     Column('user_id', ForeignKey('users.id'), primary_key=True)
 )
 
+cohort_members = Table(
+    'cohort_members',
+    Base.metadata,
+    Column('cohort_id', ForeignKey('cohorts.id'), primary_key=True),
+    Column('user_id', ForeignKey('users.id'), primary_key=True)
+)
 
 class User(Base):
     __tablename__ = 'users'
@@ -44,6 +50,12 @@ class User(Base):
         "Tweet",
         secondary=tweet_mentions,
         back_populates="mentioned_users"
+    )
+    cohorts = relationship(
+        "Cohort",
+        secondary=cohort_members,
+        back_populates="members",
+        collection_class=set
     )
 
     variable_properties = [
@@ -130,3 +142,15 @@ class Tweet(Base):
         for m_user in tweet_status.user_mentions:
             tweet.mentioned_users.add(User.from_twitter_user(m_user))
         return tweet
+
+
+class Cohort(Base):
+    __tablename__ = 'cohorts'
+    id = Column(BigInteger, primary_key=True)
+    description = Column(String(320))
+    members = relationship(
+        "User",
+        secondary=cohort_members,
+        back_populates="cohorts",
+        collection_class=set
+    )
