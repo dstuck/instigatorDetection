@@ -46,8 +46,25 @@ class User(Base):
         back_populates="mentioned_users"
     )
 
+    variable_properties = [
+        'screen_name',
+        'created_at',
+        'followers_count',
+        'favorites_count',
+        'statuses_count',
+        'lang',
+        'description',
+        'name',
+    ]
+
     def __repr__(self):
         return '<User {}, {}>'.format(self.screen_name, self.id)
+
+    def to_dict(self):
+        properties = {'id': self.id}
+        for variable_property in self.variable_properties:
+            properties[variable_property] = getattr(self, variable_property)
+        return properties
 
     @classmethod
     def from_twitter_user(cls, twitter_user):
@@ -90,7 +107,8 @@ class Tweet(Base):
     mentioned_users = relationship(
         "User",
         secondary=tweet_mentions,
-        back_populates="mentions"
+        back_populates="mentions",
+        collection_class=set
     )
 
     def __repr__(self):
@@ -110,5 +128,5 @@ class Tweet(Base):
         tweet = cls(**init_kwargs)
         tweet.user = User.from_twitter_user(tweet_status.user)
         for m_user in tweet_status.user_mentions:
-            tweet.mentioned_users.append(User.from_twitter_user(m_user))
+            tweet.mentioned_users.add(User.from_twitter_user(m_user))
         return tweet
