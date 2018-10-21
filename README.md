@@ -14,3 +14,5 @@ Looking into twitter events to model spread of local correlated events
 [Rate-Limits](https://developer.twitter.com/en/docs/basics/rate-limits)
 
 [Paging](https://developer.twitter.com/en/docs/tweets/timelines/guides/working-with-timelines)
+
+[python-twitter](https://python-twitter.readthedocs.io/en/latest/)
