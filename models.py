@@ -15,6 +15,13 @@ tweet_mentions = Table(
     Column('user_id', ForeignKey('users.id'), primary_key=True)
 )
 
+follows = Table(
+    'follows',
+    Base.metadata,
+    Column('follower_id', ForeignKey('users.id'), primary_key=True),
+    Column('followed_id', ForeignKey('users.id'), primary_key=True)
+)
+
 cohort_members = Table(
     'cohort_members',
     Base.metadata,
@@ -51,6 +58,15 @@ class User(Base):
         secondary=tweet_mentions,
         back_populates="mentioned_users"
     )
+    # https://docs.sqlalchemy.org/en/latest/orm/join_conditions.html#self-referential-many-to-many-relationship
+    following = relationship(
+        "User",
+        secondary=follows,
+        back_populates="friends",
+        primaryjoin=(id == follows.c.follower_id),
+        secondaryjoin=(id == follows.c.followed_id),
+        collection_class=set
+    )
     cohorts = relationship(
         "Cohort",
         secondary=cohort_members,
@@ -83,13 +99,16 @@ class User(Base):
         init_kwargs = {
             'id': twitter_user.id,
             'screen_name': twitter_user.screen_name,
+            'name': twitter_user.name,
+            'description': twitter_user.description,
             'created_at': timegm(parsedate(twitter_user.created_at)) if twitter_user.created_at else None,
             'followers_count': twitter_user.followers_count,
+            'friends_count': twitter_user.friends_count,
             'favorites_count': twitter_user.favourites_count,
             'statuses_count': twitter_user.statuses_count,
+            'protected': twitter_user.protected,
+            'verified': twitter_user.verified,
             'lang': twitter_user.lang,
-            'description': twitter_user.description,
-            'name': twitter_user.name,
         }
         return cls(**init_kwargs)
 
