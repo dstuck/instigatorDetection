@@ -59,12 +59,20 @@ class User(Base):
         back_populates="mentioned_users"
     )
     # https://docs.sqlalchemy.org/en/latest/orm/join_conditions.html#self-referential-many-to-many-relationship
-    following = relationship(
+    followers = relationship(
         "User",
         secondary=follows,
         back_populates="friends",
         primaryjoin=(id == follows.c.follower_id),
         secondaryjoin=(id == follows.c.followed_id),
+        collection_class=set
+    )
+    friends = relationship(
+        "User",
+        secondary=follows,
+        back_populates="followers",
+        primaryjoin=(id == follows.c.followed_id),
+        secondaryjoin=(id == follows.c.follower_id),
         collection_class=set
     )
     cohorts = relationship(
