@@ -2,7 +2,7 @@ from calendar import timegm
 from datetime import datetime
 from email.utils import parsedate
 
-from sqlalchemy import BigInteger, Column, DateTime, Integer, ForeignKey, String, Table
+from sqlalchemy import BigInteger, Boolean, Column, DateTime, Integer, ForeignKey, String, Table
 from sqlalchemy.orm import relationship
 from database import Base
 
@@ -35,11 +35,14 @@ class User(Base):
     screen_name = Column(String(50), unique=True)
     created_at = Column(Integer())
     followers_count = Column(BigInteger())
+    friends_count = Column(BigInteger())
     favorites_count = Column(BigInteger())
     statuses_count = Column(BigInteger())
     lang = Column(String(20))
     description = Column(String(320))
     name = Column(String(200))
+    protected = Column(Boolean)
+    verified = Column(Boolean)
     db_created_at = Column(
         DateTime,
         nullable=False,
@@ -86,11 +89,14 @@ class User(Base):
         'screen_name',
         'created_at',
         'followers_count',
+        'friends_count',
         'favorites_count',
         'statuses_count',
         'lang',
         'description',
         'name',
+        'protected',
+        'verified'
     ]
 
     def __repr__(self):

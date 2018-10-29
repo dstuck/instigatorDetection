@@ -13,7 +13,7 @@ fileConfig(config.config_file_name)
 
 # add your model's MetaData object here
 # for 'autogenerate' support
-import models
+import models, crawler_models
 from database import Base
 target_metadata = Base.metadata
 
