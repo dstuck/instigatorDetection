@@ -9,7 +9,7 @@ setup(
     install_requires=[
         "python-twitter",
         "pyyaml",
-        "SQLAlchemy==1.2.11",
+        "SQLAlchemy>=1.3.0",
         "alembic==1.0.0",
         "psycopg2==2.7.5",
     ],
